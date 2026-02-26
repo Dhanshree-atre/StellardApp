@@ -3,6 +3,12 @@
 A decentralized payment application built using React and the Stellar Test Network.  
 This project demonstrates wallet integration, balance retrieval, and XLM transaction execution using Freighter Wallet.
 
+🌐 **Live Demo:** https://stelardapp.netlify.app/
+
+## 📸 Application Preview
+<img width="1880" height="975" alt="image" src="https://github.com/user-attachments/assets/d8b82f4e-c65f-4850-b294-55a6d2f0282a" />
+<img width="1880" height="975" alt="image" src="https://github.com/user-attachments/assets/d8b82f4e-c65f-4850-b294-55a6d2f0282a" />
+
 ---
 
 ##  Project Overview
