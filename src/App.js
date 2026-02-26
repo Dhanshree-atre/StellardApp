@@ -1,123 +1,69 @@
-import React, { useState } from "react";
-import {
-  requestAccess,
-  getAddress,
-  signTransaction,
-} from "@stellar/freighter-api";
-import * as StellarSdk from "stellar-sdk";
-import WalletUI from "./components/WalletUI";
+import React from "react";
 
-function App() {
-  const [publicKey, setPublicKey] = useState("");
-  const [balance, setBalance] = useState("");
-  const [amount, setAmount] = useState("");
-  const [recipient, setRecipient] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [txHash, setTxHash] = useState("");
-
-  const server = new StellarSdk.Horizon.Server(
-    "https://horizon-testnet.stellar.org"
-  );
-
-  // Connect Wallet
-  const connectWallet = async () => {
-    try {
-      await requestAccess();
-      const addressObj = await getAddress();
-      setPublicKey(addressObj.address);
-      alert("Wallet Connected!");
-    } catch (error) {
-      console.error(error);
-      alert("Wallet connection failed.");
-    }
-  };
-
-  // Check Balance
-  const checkBalance = async () => {
-    try {
-      const account = await server.loadAccount(publicKey);
-      const xlmBalance = account.balances.find(
-        (b) => b.asset_type === "native"
-      );
-      setBalance(xlmBalance.balance);
-    } catch (error) {
-      console.error(error);
-      alert("Error fetching balance.");
-    }
-  };
-
-  // Send Payment
-  const sendPayment = async () => {
-    if (!recipient) {
-      alert("Enter recipient address.");
-      return;
-    }
-
-    if (!amount || parseFloat(amount) <= 0) {
-      alert("Enter valid amount.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setTxHash("");
-
-      const sourceAccount = await server.loadAccount(publicKey);
-
-      const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
-        fee: StellarSdk.BASE_FEE,
-        networkPassphrase: StellarSdk.Networks.TESTNET,
-      })
-        .addOperation(
-          StellarSdk.Operation.payment({
-            destination: recipient,
-            asset: StellarSdk.Asset.native(),
-            amount: amount,
-          })
-        )
-        .setTimeout(30)
-        .build();
-
-      const signed = await signTransaction(transaction.toXDR(), {
-        networkPassphrase: StellarSdk.Networks.TESTNET,
-      });
-
-      const tx = StellarSdk.TransactionBuilder.fromXDR(
-        signed.signedTxXdr,
-        StellarSdk.Networks.TESTNET
-      );
-
-      const result = await server.submitTransaction(tx);
-
-      setTxHash(result.hash);
-      alert("Payment Successful!");
-      checkBalance();
-      setAmount("");
-      setRecipient("");
-
-    } catch (error) {
-      console.error(error);
-      alert("Transaction failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+function WalletUI({
+  publicKey,
+  balance,
+  amount,
+  recipient,
+  loading,
+  txHash,
+  setAmount,
+  setRecipient,
+  connectWallet,
+  checkBalance,
+  sendPayment,
+}) {
   return (
-    <WalletUI
-      publicKey={publicKey}
-      balance={balance}
-      amount={amount}
-      recipient={recipient}
-      loading={loading}
-      txHash={txHash}
-      setAmount={setAmount}
-      setRecipient={setRecipient}
-      connectWallet={connectWallet}
-      checkBalance={checkBalance}
-      sendPayment={sendPayment}
-    />
+    <div style={{ textAlign: "center", padding: "40px" }}>
+      <h1>🚀 Stellar Payment dApp</h1>
+
+      {!publicKey ? (
+        <button onClick={connectWallet}>Connect Wallet</button>
+      ) : (
+        <>
+          <p><strong>Connected Wallet:</strong> {publicKey}</p>
+
+          <button onClick={checkBalance}>Check Balance</button>
+          <p><strong>Balance:</strong> {balance} XLM</p>
+
+          <hr style={{ margin: "20px" }} />
+
+          <h3>Send XLM</h3>
+
+          <input
+            type="text"
+            placeholder="Recipient Address"
+            value={recipient}
+            onChange={(e) => setRecipient(e.target.value)}
+            style={{ width: "300px", padding: "8px", margin: "5px" }}
+          />
+
+          <br />
+
+          <input
+            type="number"
+            placeholder="Amount (XLM)"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            style={{ width: "300px", padding: "8px", margin: "5px" }}
+          />
+
+          <br />
+
+          <button onClick={sendPayment} disabled={loading}>
+            {loading ? "Sending..." : "Send Payment"}
+          </button>
+
+          {txHash && (
+            <div style={{ marginTop: "20px" }}>
+              <p><strong>Transaction Hash:</strong></p>
+              <p>{txHash}</p>
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }
 
-export default App;
+export default WalletUI;
