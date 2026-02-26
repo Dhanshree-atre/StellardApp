@@ -7,7 +7,7 @@ This project demonstrates wallet integration, balance retrieval, and XLM transac
 
 ## 📸 Application Preview
 <img width="1880" height="975" alt="image" src="https://github.com/user-attachments/assets/d8b82f4e-c65f-4850-b294-55a6d2f0282a" />
-<img width="1880" height="975" alt="image" src="https://github.com/user-attachments/assets/d8b82f4e-c65f-4850-b294-55a6d2f0282a" />
+<img width="1571" height="1081" alt="image" src="https://github.com/user-attachments/assets/665366c1-18b7-40b0-bbca-814c5fc9aeb6" />
 
 ---
 
@@ -125,5 +125,5 @@ Through this project, the following concepts were implemented:
 ## 👨‍💻 Author
 
 Dhanshree Atre 
-sppu
+
  
