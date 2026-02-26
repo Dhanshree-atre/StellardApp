@@ -1,12 +1,23 @@
 import React, { useState } from "react";
-import { requestAccess, getAddress, signTransaction } from "@stellar/freighter-api";
+import {
+  requestAccess,
+  getAddress,
+  signTransaction,
+} from "@stellar/freighter-api";
 import * as StellarSdk from "stellar-sdk";
 import WalletUI from "./components/WalletUI";
 
 function App() {
   const [publicKey, setPublicKey] = useState("");
   const [balance, setBalance] = useState("");
+  const [amount, setAmount] = useState("");
+  const [recipient, setRecipient] = useState("");
   const [loading, setLoading] = useState(false);
+  const [txHash, setTxHash] = useState("");
+
+  const server = new StellarSdk.Horizon.Server(
+    "https://horizon-testnet.stellar.org"
+  );
 
   // Connect Wallet
   const connectWallet = async () => {
@@ -14,40 +25,42 @@ function App() {
       await requestAccess();
       const addressObj = await getAddress();
       setPublicKey(addressObj.address);
+      alert("Wallet Connected!");
     } catch (error) {
-      console.error("Connection Error:", error);
-      alert("Connection failed.");
+      console.error(error);
+      alert("Wallet connection failed.");
     }
   };
 
   // Check Balance
   const checkBalance = async () => {
     try {
-      const server = new StellarSdk.Horizon.Server(
-        "https://horizon-testnet.stellar.org"
-      );
-
       const account = await server.loadAccount(publicKey);
-
       const xlmBalance = account.balances.find(
         (b) => b.asset_type === "native"
       );
-
       setBalance(xlmBalance.balance);
     } catch (error) {
-      console.error("Balance error:", error);
-      alert("Error loading balance.");
+      console.error(error);
+      alert("Error fetching balance.");
     }
   };
 
-  // Send 1 XLM to Yourself
+  // Send Payment
   const sendPayment = async () => {
+    if (!recipient) {
+      alert("Enter recipient address.");
+      return;
+    }
+
+    if (!amount || parseFloat(amount) <= 0) {
+      alert("Enter valid amount.");
+      return;
+    }
+
     try {
       setLoading(true);
-
-      const server = new StellarSdk.Horizon.Server(
-        "https://horizon-testnet.stellar.org"
-      );
+      setTxHash("");
 
       const sourceAccount = await server.loadAccount(publicKey);
 
@@ -57,9 +70,9 @@ function App() {
       })
         .addOperation(
           StellarSdk.Operation.payment({
-            destination: publicKey,
+            destination: recipient,
             asset: StellarSdk.Asset.native(),
-            amount: "1",
+            amount: amount,
           })
         )
         .setTimeout(30)
@@ -74,13 +87,16 @@ function App() {
         StellarSdk.Networks.TESTNET
       );
 
-      await server.submitTransaction(tx);
+      const result = await server.submitTransaction(tx);
 
+      setTxHash(result.hash);
       alert("Payment Successful!");
       checkBalance();
+      setAmount("");
+      setRecipient("");
 
     } catch (error) {
-      console.error("Payment failed:", error);
+      console.error(error);
       alert("Transaction failed.");
     } finally {
       setLoading(false);
@@ -91,7 +107,12 @@ function App() {
     <WalletUI
       publicKey={publicKey}
       balance={balance}
+      amount={amount}
+      recipient={recipient}
       loading={loading}
+      txHash={txHash}
+      setAmount={setAmount}
+      setRecipient={setRecipient}
       connectWallet={connectWallet}
       checkBalance={checkBalance}
       sendPayment={sendPayment}
