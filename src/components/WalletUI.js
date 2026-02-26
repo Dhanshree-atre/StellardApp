@@ -4,11 +4,9 @@ function WalletUI({
   publicKey,
   balance,
   amount,
-  recipient,
   loading,
   txHash,
   setAmount,
-  setRecipient,
   connectWallet,
   checkBalance,
   sendPayment,
@@ -21,37 +19,27 @@ function WalletUI({
         <button onClick={connectWallet}>Connect Wallet</button>
       ) : (
         <>
-          <p><strong>Connected Wallet:</strong> {publicKey}</p>
+          <p><strong>Wallet:</strong> {publicKey}</p>
 
           <button onClick={checkBalance}>Check Balance</button>
           <p><strong>Balance:</strong> {balance} XLM</p>
 
           <hr style={{ margin: "20px" }} />
 
-          <h3>Send XLM</h3>
-
-          <input
-            type="text"
-            placeholder="Recipient Address"
-            value={recipient}
-            onChange={(e) => setRecipient(e.target.value)}
-            style={{ width: "300px", padding: "8px", margin: "5px" }}
-          />
-
-          <br />
+          <h3>Send XLM (Self Transfer)</h3>
 
           <input
             type="number"
-            placeholder="Amount (XLM)"
+            placeholder="Enter Amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            style={{ width: "300px", padding: "8px", margin: "5px" }}
+            style={{ width: "250px", padding: "8px", margin: "10px" }}
           />
 
           <br />
 
           <button onClick={sendPayment} disabled={loading}>
-            {loading ? "Sending..." : "Send Payment"}
+            {loading ? "Sending..." : "Send XLM"}
           </button>
 
           {txHash && (
